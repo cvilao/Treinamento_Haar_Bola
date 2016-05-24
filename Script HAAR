@@ -1,0 +1,39 @@
+1 - Fazer o video da bola e inteira na imagem sem oclusão, de distância de +/- 1 metro.
+2 - Fazer outro video dos locais sem a bola. 
+3 - Usar o vlc para desmembrar o video em imagens.
+4 - Excluir as imagens borradas e separar nas pastas Positive e Negative.
+5 - Rodar o programa Object |||| ./object positive.txt /home/fei/HAAR/Positive/
+
+5a - Selecionar o objeto inteiro, mesmo que passe um pouco para fora e nunca para dentro. Nesse passo o programa pega as imagens que estão no diretório fornecido e gera um arquivo positive.txt com o caminho de todas as imagens e a posição do objeto. 
+
+Na seguinte forma: 
+/home/fei/HAAR/Positive/image.jpg 1 922 559 195 194 
+Alterar para a seguinte:
+Positive/image.jpg 1 922 559 195 194
+
+6 - Abrir a pasta Negatives e gerar um arquivo txt para as imagens negativas ls > negative.txt
+7 - O arquivo negative.txt estará na pasta Negatives, movê-la para a pasta HAAR.
+
+8 - Na seguinte forma: 
+/home/fei/HAAR/Negative/image.jpg
+Alterar para a seguinte:
+Negative/image.jpg
+
+9 - Criar amostras vetorizadas para uso do classificador. Os parametros w e h são obtidos vasculhando os dois ultimos dados, e encontrando os menores, do arquivo positives.txt  ||| opencv_createsamples -info Positive.txt -vec BallVecFile.vec -w 80 -h 80
+
+10 - Fazer o treinamento com o Haartraining. ||| opencv_haartraining -data Data -vec BallVecFile.vec -bg Negative.txt -nstages 20 -npos 100 -nneg 650 -mem 2048 -modeALL -w 80 -h 80
+
+Data = Pasta onde o treinamento será guardado.
+BallVecFile.vec = Arquivo vetorizado.
+Negative.txt = arquivo onde estão os caminhos de cada imagem negativa
+nstages = Quantidade de estágios de treinamento. O Treinamento pode parar antes desde que o limite de erro seja atingido. 
+Npos  = usar formula ||| Npos < (Número de imagens positivas - Número de imagens negativas) / [1 + ( 1 - 0,995)(20-1)]
+nneg = contar quantas linhas existem no arquivo negative.txt. Ver rodapé do arquivo.
+Mem = memoria disponibilizada em MB.
+modeALL = Seleciona todas as caracteristicas
+w e h iguais ao createsamples
+
+11 - Assim que o treinamento acabar rode o convert cascade. || ./convert_cascade --size"80x80" Data Ball.xml
+
+12 - Testar o treinamento. ||| ./Detect
+
